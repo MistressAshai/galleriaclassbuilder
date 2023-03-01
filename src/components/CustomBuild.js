@@ -75,7 +75,7 @@ const CustomBuild = ({ changeClass, facetName, editBuild, hide, skills }) => {
             className={"CustomBuild-header"}
             style={{ backgroundImage: headerColor }}
             onClick={() => cycleClass()}
-            onContextMenu={(e) => {
+            onContextMenu={e => {
               e.preventDefault();
               toggleAltFacet();
             }}
