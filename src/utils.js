@@ -295,19 +295,28 @@ export const getFacetOrder = build => {
     }
   }
 
-  let stop = false;
+  /*
+    Sorting facets in this order:
+    1. INITIAL class facet to cut skill cost
+    2. facets whose soul transfer level < 99
+    3. facets whose soul transfer level = 99
+    4. Target (chosen) desired facet to end up in
+  */
+  let deOrder = 997;
+  const firstStep = reOrdered[0] || { facet: 'hasldf' };
   for (const daStep of reOrdered) {
-    if (daStep.facet === getFacetAltByName(targetFacet.facet)) {
-      for (const sk of daStep.skills) {
-        if (sk.innate) {
+    for (const sk of daStep.skills) {
+      if (sk.innate) {
+        if (daStep.facet === getFacetAltByName(targetFacet.facet)) {
           daStep.order = 998;
-          stop = true;
+          break;
+        } else if (daStep.facet !== firstStep.facet && daStep.facet !== targetFacet.facet) {
+          daStep.order = Math.max(daStep.order || 1, deOrder);
+          deOrder--;
           break;
         }
       }
     }
-
-    if (stop) { break; }
   }
 
   reOrdered.sort((a, b) => {
@@ -495,6 +504,26 @@ export const getSoulTransfersToReachSoulClarity = (currentSoulClarity, targetSou
 
 export const getFacetColor = facetName => {
   return Facets.colors[Facets.names.indexOf(facetName)] || "white";
+};
+
+export const generateBuildString = (facetName, skills, soulClarity) => {
+  const skillNumberStr = skills
+  .filter(x => x.name !== "")
+  .map(x => getSkillNumberByName(x.name))
+  .join("-");
+
+  const clarity = isNaN(soulClarity) ? 1 : soulClarity;
+  return `${getFacetNumber(facetName)}_${skillNumberStr}_${clarity}`;
+};
+
+export const isJsonString = str => {
+  try {
+      JSON.parse(str);
+  } catch (e) {
+      return false;
+  }
+
+  return true;
 };
 
 export const newSkill = (name, description, innate, color) => {
